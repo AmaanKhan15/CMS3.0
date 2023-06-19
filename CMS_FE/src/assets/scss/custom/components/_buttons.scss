@@ -1,0 +1,26 @@
+// 
+// _buttons.scss
+// 
+
+button,a {
+  outline: none !important;
+}
+
+
+// Rounded Buttons
+.btn-rounded {
+  border-radius: 30px;
+}
+.btn-rounded-small {
+  border-radius: 20px;
+}
+
+.btn-dark{
+  color: $gray-200 !important;
+}
+
+.btn-outline-dark{
+  &:hover{
+    color: $gray-200 !important;
+  }
+}
