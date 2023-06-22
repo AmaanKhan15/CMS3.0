@@ -20,6 +20,7 @@ const Dashboard = props => {
   useEffect(async () => {
     var myHeaders = new Headers()
     myHeaders.append("Content-Type", "application/json")
+    myHeaders.append("Cache-Control", "no-cache")
     let res = await fetch(`${URL}` + `/dashboardCard`, {
       method: "get",
       headers: myHeaders,

@@ -2,14 +2,11 @@ import axios from "axios"
 import MockAdapter from "axios-mock-adapter"
 import * as url from "../url_helper"
 import accessToken from "../jwt-token-access/accessToken"
-import { Alert } from "reactstrap";
+import { Alert } from "reactstrap"
 
-import {
-  calenderDefaultCategories,
-  events,
-} from "../../common/data";
-import crypto from 'crypto'
-const URL = process.env.REACT_APP_FAKE_URL;
+import { calenderDefaultCategories, events } from "../../common/data"
+import crypto from "crypto"
+const URL = process.env.REACT_APP_FAKE_URL
 
 // var crypto=require('crypto')
 let users = [
@@ -29,7 +26,7 @@ let users = [
   },
 ]
 
-const fakeBackend = async() => {
+const fakeBackend = async () => {
   // This sets the mock adapter on the default instance
   const mock = new MockAdapter(axios)
 
@@ -43,23 +40,21 @@ const fakeBackend = async() => {
     })
   })
 
-  mock.onPost("/post-fake-login").reply(async(config )=> {
+  mock.onPost("/post-fake-login").reply(async config => {
     const user = JSON.parse(config["data"])
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-  let res = await fetch(
-    `${URL}`,
-    {
+    var myHeaders = new Headers()
+    myHeaders.append("Content-Type", "application/json")
+    myHeaders.append("Cache-Control", "no-cache")
+    let res = await fetch(`${URL}`, {
       method: "get",
       headers: myHeaders,
-    }
-  );
-  let response = await res.json();
-  console.log("post data is",response, user.email , user.password)
-  var hash=crypto.createHash('sha512')
-  var data=hash.update(user.password,'utf-8')
-  var gen_hash=data.digest('hex')
-let users=response.data;
+    })
+    let response = await res.json()
+    console.log("post data is", response, user.email, user.password)
+    var hash = crypto.createHash("sha512")
+    var data = hash.update(user.password, "utf-8")
+    var gen_hash = data.digest("hex")
+    let users = response.data
     const validUser = users.filter(
       usr => usr.email === user.email && usr.password === gen_hash
     )
@@ -67,8 +62,8 @@ let users=response.data;
       setTimeout(() => {
         if (validUser["length"] === 1) {
           resolve([200, validUser[0]])
-        } else {         
-           reject([
+        } else {
+          reject([
             400,
             "Username and password are invalid. Please enter correct username and password",
           ])
@@ -288,7 +283,6 @@ let users=response.data;
       })
     })
   })
-
 }
 
 export default fakeBackend

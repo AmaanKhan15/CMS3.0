@@ -357,7 +357,7 @@ const Dashboard = props => {
                                                     </Col>
                                                 </div>
                                             </div>
-                                            <SalesTable report={reportData} />
+                                            <SalesTable report={reportData?.Floordata ? reportData?.Floordata:[]} />
                                         </CardBody>
                                     </Card>
                                 </Col> 

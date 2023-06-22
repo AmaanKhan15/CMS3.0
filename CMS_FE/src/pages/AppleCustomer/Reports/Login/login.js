@@ -1,131 +1,158 @@
-import React, { useState, useEffect } from "react";
-const URL = process.env.REACT_APP_BASE_URL;
+import React, { useState, useEffect } from "react"
+const URL = process.env.REACT_APP_BASE_URL
 import {
-    Card,
-    CardBody,
-    Col,
-    Container,
-    Form,
-    FormGroup,
-    Label,
-    Input,
-    NavItem,
-    NavLink,
-    Row,
-    TabContent,
-    TabPane
-} from "reactstrap";
+  Card,
+  CardBody,
+  Col,
+  Container,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  NavItem,
+  NavLink,
+  Row,
+  TabContent,
+  TabPane,
+} from "reactstrap"
 import { Link } from "react-router-dom"
-import { ThreeDots } from 'react-loader-spinner'
-import Pagination from 'react-mui-pagination';
-import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
-import Fab from '@material-ui/core/Fab';
-import { DeleteMarchand, getMerchandList} from '../../../store/services/promotor'
-import Swal from "sweetalert2";
-import {useHistory} from 'react-router-dom';
-import "../../../assets/scss/style.bundle.css";
+import { ThreeDots } from "react-loader-spinner"
+import Pagination from "react-mui-pagination"
+import { MuiThemeProvider, createTheme } from "@material-ui/core/styles"
+import Fab from "@material-ui/core/Fab"
+import {
+  DeleteMarchand,
+  getMerchandList,
+} from "../../../store/services/promotor"
+import Swal from "sweetalert2"
+import { useHistory } from "react-router-dom"
+import "../../../assets/scss/style.bundle.css"
 const theme = createTheme({
-    palette: {
-        primary: {
-            main: '#306060'
-        }
-    }
-});
-const ListTable = (props) => {
-    const [apidata, setApidata] = useState([]);
-    const [filterResult, setfilterResult] = useState([]);
-    const [searchInput, setSearchInput] = useState('');
-    let [loading, setLoading] = useState(true);
-    const itemsPerPage = 10;
-    const [page, setPage] = useState(1);
-    const [noOfPages, setnoOfPages] = useState('');
-    const handleChange = (event, value) => {
-        setPage(value);
-    };
-    useEffect(async () => {
-        var myHeaders = new Headers();
-        myHeaders.append("Content-Type", "application/json");
-        let res = await fetch(
-            `${URL}` + `/promotor`,
-            {
-                method: "GET",
-                headers: myHeaders,
-            }
-        );
-        let response = await res.json();
-        const empResult = response.data;
-        setnoOfPages(Math.ceil(empResult.length / itemsPerPage))
-        // setData(empResult.slice(0, pageSize));
-        setApidata(empResult);
-        setLoading(false);
-        setTimeout(() => {
-            setLoading(false);
-        }, 5000);
+  palette: {
+    primary: {
+      main: "#306060",
+    },
+  },
+})
+const ListTable = props => {
+  const [apidata, setApidata] = useState([])
+  const [filterResult, setfilterResult] = useState([])
+  const [searchInput, setSearchInput] = useState("")
+  let [loading, setLoading] = useState(true)
+  const itemsPerPage = 10
+  const [page, setPage] = useState(1)
+  const [noOfPages, setnoOfPages] = useState("")
+  const handleChange = (event, value) => {
+    setPage(value)
+  }
+  useEffect(async () => {
+    var myHeaders = new Headers()
+    myHeaders.append("Content-Type", "application/json")
+    myHeaders.append("Cache-Control", "no-cache")
+    let res = await fetch(`${URL}` + `/promotor`, {
+      method: "GET",
+      headers: myHeaders,
+    })
+    let response = await res.json()
+    const empResult = response.data
+    setnoOfPages(Math.ceil(empResult.length / itemsPerPage))
+    // setData(empResult.slice(0, pageSize));
+    setApidata(empResult)
+    setLoading(false)
+    setTimeout(() => {
+      setLoading(false)
+    }, 5000)
   }, [])
-        
-    const HandleEdit = (id) => {
 
+  const HandleEdit = id => {}
+  const HandleDelete = async id => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async result => {
+      if (result.isConfirmed) {
+        let data = await DeleteMarchand(id)
+        Swal.fire("Deleted!", "Your Record has been deleted.", "success")
+      }
+    })
+    setApidata(prev => prev.filter(el => el.id !== id)) // filter by id
+  }
+  const searchItems = searchValue => {
+    setSearchInput(searchValue)
+    if (searchInput !== "") {
+      const filteredData = apidata.filter(item => {
+        return Object.values(item)
+          .join("")
+          .toLowerCase()
+          .includes(searchInput.toLowerCase())
+      })
+      setfilterResult(filteredData)
     }
-    const HandleDelete = async (id) => {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                let data = await DeleteMarchand(id);
-                Swal.fire(
-                    'Deleted!',
-                    'Your Record has been deleted.',
-                    'success'
-                )
-            }
-        })
-        setApidata(prev => prev.filter((el) => el.id !== id)); // filter by id       
-    }
-    const searchItems = (searchValue) => {
-        setSearchInput(searchValue)
-        if (searchInput !== '') {
-            const filteredData = apidata.filter((item) => {
-                return Object.values(item).join('').toLowerCase().includes(searchInput.toLowerCase())
-            })
-            setfilterResult(filteredData)
-        }
-    }
-    return (
-        <React.Fragment>
-            {loading ? (
-                <Container fluid>
-                    <div
-                        className="pagination" style={{
-                            position: 'relative ',
-                            marginTop: '20%'
-                        }}>
-                        <ThreeDots color="#306060" height={80} width={80} />
-                    </div>
-                </Container>
-            ) : (
-                <div class="card mb-5 mb-xl-8">
-                    <div class="card-header border-0 pt-6">
-                        <div class="card-title">
-                            <div class="d-flex align-items-center position-relative my-1">
-                                <span class="svg-icon svg-icon-1 position-absolute ms-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <rect opacity="0.5" x="17.0365" y="15.1223" width="8.15546" height="2" rx="1" transform="rotate(45 17.0365 15.1223)" fill="black" />
-                                        <path d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z" fill="black" />
-                                    </svg>
-                                </span>
-                                <input onChange={(e) => searchItems(e.target.value)} type="text" data-kt-customer-table-filter="search" class="form-control form-control-lg form-control-solid w-450px ps-15" placeholder="Search..." />
-                            </div>
-                        </div>
+  }
+  return (
+    <React.Fragment>
+      {loading ? (
+        <Container fluid>
+          <div
+            className="pagination"
+            style={{
+              position: "relative ",
+              marginTop: "20%",
+            }}
+          >
+            <ThreeDots color="#306060" height={80} width={80} />
+          </div>
+        </Container>
+      ) : (
+        <div class="card mb-5 mb-xl-8">
+          <div class="card-header border-0 pt-6">
+            <div class="card-title">
+              <div class="d-flex align-items-center position-relative my-1">
+                <span class="svg-icon svg-icon-1 position-absolute ms-6">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <rect
+                      opacity="0.5"
+                      x="17.0365"
+                      y="15.1223"
+                      width="8.15546"
+                      height="2"
+                      rx="1"
+                      transform="rotate(45 17.0365 15.1223)"
+                      fill="black"
+                    />
+                    <path
+                      d="M11 19C6.55556 19 3 15.4444 3 11C3 6.55556 6.55556 3 11 3C15.4444 3 19 6.55556 19 11C19 15.4444 15.4444 19 11 19ZM11 5C7.53333 5 5 7.53333 5 11C5 14.4667 7.53333 17 11 17C14.4667 17 17 14.4667 17 11C17 7.53333 14.4667 5 11 5Z"
+                      fill="black"
+                    />
+                  </svg>
+                </span>
+                <input
+                  onChange={e => searchItems(e.target.value)}
+                  type="text"
+                  data-kt-customer-table-filter="search"
+                  class="form-control form-control-lg form-control-solid w-450px ps-15"
+                  placeholder="Search..."
+                />
+              </div>
+            </div>
 
-                        <div class="card-toolbar">
-                            <div class="d-flex justify-content-end" data-kt-customer-table-toolbar="base">
-                                {/* <button type="button" class="btn btn-light-primary me-3" data-bs-toggle="modal" data-bs-target="#kt_customers_export_modal">
+            <div class="card-toolbar">
+              <div
+                class="d-flex justify-content-end"
+                data-kt-customer-table-toolbar="base"
+              >
+                {/* <button type="button" class="btn btn-light-primary me-3" data-bs-toggle="modal" data-bs-target="#kt_customers_export_modal">
                                     <span class="svg-icon svg-icon-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                                             <rect opacity="0.3" x="12.75" y="4.25" width="12" height="2" rx="1" transform="rotate(90 12.75 4.25)" fill="black" />
@@ -135,158 +162,223 @@ const ListTable = (props) => {
                                     </span>
                                     <a href={storeSample} download="store_sample">Download</a>
                                     </button> */}
-                                    {/* <Button><a href={storeSample} download="store_sample">Download</a></Button> */}
+                {/* <Button><a href={storeSample} download="store_sample">Download</a></Button> */}
 
-                                <Link type="button" to="/promotor-add" class="btn btn-primary font-size-14" data-bs-toggle="modal" data-bs-target="#kt_modal_add_customer">Add Promotor</Link>
-                            </div>
+                <Link
+                  type="button"
+                  to="/promotor-add"
+                  class="btn btn-primary font-size-14"
+                  data-bs-toggle="modal"
+                  data-bs-target="#kt_modal_add_customer"
+                >
+                  Add Promotor
+                </Link>
+              </div>
+            </div>
+            {/*end::Card toolbar*/}
+          </div>
+          <div class="card-body py-3">
+            <div class="table-responsive">
+              {apidata.length > 0 ? (
+                <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
+                  <thead>
+                    <tr class="text-muted fw-normal font-size-15">
+                      <th class="min-w-150px">Marchand name</th>
+                      <th class="min-w-140px">Contact no</th>
+                      <th class="min-w-120px">Area</th>
+                      <th class="min-w-120px">Status</th>
+                      <th class="min-w-120px">City</th>
+                      <th class="min-w-120px">Address</th>
+                      <th class="min-w-100px text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchInput.length > 1
+                      ? filterResult
+                          .slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                          .map((item, key) => {
+                            return (
+                              <tr key={key}>
+                                <td>
+                                  <div class="d-flex align-items-center">
+                                    <div class="d-flex justify-content-start flex-column">
+                                      <a
+                                        href="#"
+                                        class="text-muted fw-normal font-size-14"
+                                      >
+                                        {`${item.first_name}` +
+                                          " " +
+                                          `${item.last_name}`}
+                                      </a>
+                                      {/* <span class="text-muted fw-bold text-muted d-block fs-7">HTML, JS, ReactJS</span> */}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.phone_no}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.area}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  {item.customer_id ? (
+                                    <span class="badge-pro bg-badge-active text-muted fw-normal font-size-14">
+                                      Active
+                                    </span>
+                                  ) : (
+                                    <span class="badge-pro bg-badge-inactive text-muted fw-normal font-size-14 ">
+                                      In Active
+                                    </span>
+                                  )}
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
 
-                        </div>
-                        {/*end::Card toolbar*/}
-                    </div>
-                    <div class="card-body py-3">
-                        <div class="table-responsive">
-                            {apidata.length > 0 ? (
-                                <table class="table table-row-dashed table-row-gray-300 align-middle gs-0 gy-4">
-                                    <thead>
-                                        <tr class="text-muted fw-normal font-size-15">
-                                            <th class="min-w-150px">Marchand name</th>
-                                            <th class="min-w-140px">Contact no</th>                                           
-                                            <th class="min-w-120px">Area</th>
-                                            <th class="min-w-120px">Status</th>
-                                            <th class="min-w-120px">City</th>
-                                            <th class="min-w-120px">Address</th>
-                                            <th class="min-w-100px text-end">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {searchInput.length > 1 ?
-                                            filterResult
-                                                .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                                                .map((item, key) => {
-                                                    return (
-                                                        <tr key={key}>
-                                                            <td>
-                                                                <div class="d-flex align-items-center">
-                                                                    <div class="d-flex justify-content-start flex-column">
-                                                                        <a href="#" class="text-muted fw-normal font-size-14">{`${item.first_name}` +" "+ `${item.last_name}`}</a>
-                                                                        {/* <span class="text-muted fw-bold text-muted d-block fs-7">HTML, JS, ReactJS</span> */}
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <a href="#" class="text-muted fw-normal font-size-14">{item.phone_no}</a>
-                                                                {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                            </td>
-                                                            <td>
-                                                                <a href="#" class="text-muted fw-normal font-size-14">{item.area}</a>
-                                                                {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                            </td>
-                                                            <td>
-                                                                {item.customer_id?(                                        
-                                                                <span class="badge-pro bg-badge-active text-muted fw-normal font-size-14">Active</span>):(
-                                                                <span class="badge-pro bg-badge-inactive text-muted fw-normal font-size-14 ">In Active</span>
-
-                                                                )}
-                                                             {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                            </td>
-                                                            
-                                                            <td>
-                                                                <a href="#" class="text-muted fw-normal font-size-14">{item.city}</a>
-                                                                {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                            </td>
-                                                            <td >
-                                                                <a href="#" class="text-muted fw-normal font-size-14">{item.address}</a>
-                                                                {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                            </td>
-
-                                                            
-                                                        </tr>)
-                                                }) :
-                                            apidata
-                                                .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                                                .map((item, key) => {
-                                                    return (
-                                                        <tr key={key}>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="d-flex justify-content-start flex-column">
-                                                                    <a href="#" class="text-muted fw-normal font-size-14">{`${item.first_name}` +" "+  `${item.last_name}`}</a>
-                                                                    {/* <span class="text-muted fw-bold text-muted d-block fs-7">HTML, JS, ReactJS</span> */}
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <a href="#" class="text-muted fw-normal font-size-14">{item.phone_no}</a>
-                                                            {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                        </td>
-                                                        <td>
-                                                            <a href="#" class="text-muted fw-normal font-size-14">{item.area}</a>
-                                                            {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                        </td>
-                                                        <td>
-                                                                {item.customer_id?(                                        
-                                                                <span class="badge-pro bg-badge-active text-muted fw-normal font-size-14">Active</span>):(
-                                                                <span class="badge-pro bg-badge-inactive text-muted fw-normal font-size-14 ">In Active</span>
-
-                                                                )}
-                                                             {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                        </td>
-                                                        <td>
-                                                            <span className="text-muted fw-normal font-size-14">{item.city}</span>
-                                                            {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                        </td>
-                                                        <td >
-                                                            <a href="#" class="text-muted fw-normal font-size-14">{item.address}</a>
-                                                            {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
-                                                        </td>                                                        
-                                                    </tr>)
-                                            })
-                                        }
-                                    </tbody>
-                                </table>
-                            ) : null}
-
-                        </div>
-                        {apidata.length > 0 ? (
-
-                            <MuiThemeProvider
-                                theme={theme}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-
-                                    <Pagination
-                                        linksShadow={4}
-                                        // numOfLinks={4}
-                                        page={page}
-                                        setPage={handleChange}
-                                        perPage={itemsPerPage}
-                                        total={Math.ceil(apidata.length)}
-                                        size="large"
-                                        activeLinkColor='primary'
-                                        firstContent='First'
-                                        lastContent='Last'
-                                        firstLastColor='primary'
-                                        // firstLastColor={'primary'}
-                                        FirstLastComponent={Fab} // we have used our imported component      
-                                    />
-
-                                </div>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'end',
-                                    justifyContent: 'end'
-                                }}>
-                                    <span>Total Records:{Math.ceil(apidata.length)}</span></div>
-                            </MuiThemeProvider>
-                        ) : null}
-                    </div>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.city}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.address}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                              </tr>
+                            )
+                          })
+                      : apidata
+                          .slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                          .map((item, key) => {
+                            return (
+                              <tr key={key}>
+                                <td>
+                                  <div class="d-flex align-items-center">
+                                    <div class="d-flex justify-content-start flex-column">
+                                      <a
+                                        href="#"
+                                        class="text-muted fw-normal font-size-14"
+                                      >
+                                        {`${item.first_name}` +
+                                          " " +
+                                          `${item.last_name}`}
+                                      </a>
+                                      {/* <span class="text-muted fw-bold text-muted d-block fs-7">HTML, JS, ReactJS</span> */}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.phone_no}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.area}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  {item.customer_id ? (
+                                    <span class="badge-pro bg-badge-active text-muted fw-normal font-size-14">
+                                      Active
+                                    </span>
+                                  ) : (
+                                    <span class="badge-pro bg-badge-inactive text-muted fw-normal font-size-14 ">
+                                      In Active
+                                    </span>
+                                  )}
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  <span className="text-muted fw-normal font-size-14">
+                                    {item.city}
+                                  </span>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                                <td>
+                                  <a
+                                    href="#"
+                                    class="text-muted fw-normal font-size-14"
+                                  >
+                                    {item.address}
+                                  </a>
+                                  {/* <span class="text-muted fw-bold text-muted d-block fs-7">Web, UI/UX Design</span> */}
+                                </td>
+                              </tr>
+                            )
+                          })}
+                  </tbody>
+                </table>
+              ) : null}
+            </div>
+            {apidata.length > 0 ? (
+              <MuiThemeProvider theme={theme}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Pagination
+                    linksShadow={4}
+                    // numOfLinks={4}
+                    page={page}
+                    setPage={handleChange}
+                    perPage={itemsPerPage}
+                    total={Math.ceil(apidata.length)}
+                    size="large"
+                    activeLinkColor="primary"
+                    firstContent="First"
+                    lastContent="Last"
+                    firstLastColor="primary"
+                    // firstLastColor={'primary'}
+                    FirstLastComponent={Fab} // we have used our imported component
+                  />
                 </div>
-            )}
-        </React.Fragment>
-    )
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "end",
+                    justifyContent: "end",
+                  }}
+                >
+                  <span>Total Records:{Math.ceil(apidata.length)}</span>
+                </div>
+              </MuiThemeProvider>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </React.Fragment>
+  )
 }
 
-export default ListTable;
+export default ListTable
