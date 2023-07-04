@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<body>
+<h2>JavaScript Map Objects</h2>
+<p>Creating a Map from an Array:</p>
+
+<p id="nearbystops"></p>
+
+<script>
+    var data = [
+        {
+    "code": "0001",
+    "lat": "17.688",
+    "lng": "75.9089",
+    "location": "Stop 1"
+}, 
+        {
+    "code": "000new",
+    "lat": "17.6389",
+    "lng": "75.9178",
+    "location": "Stop 1"
+}, 
+        {
+    "code": "000new2",
+    "lat": "17.6289",
+    "lng": "75.9173",
+    "location": "Stop 1"
+}, 
+{
+    "code": "0003",
+    "lat": "17.6344",
+    "lng": " 75.9088",
+    "location": "Stop 2"
+}, 
+{
+    "code": "0004",
+    "lat": "17.6244",
+    "lng": " 75.9188",
+    "location": "Stop 2"
+},
+ {
+    "code": "0002",
+    "lat": "17.63894955",
+    "lng": "75.91776801049272",
+    "location": "Stop 3"
+},
+ {
+    "code": "00010",
+    "lat": "18.4488883",
+    "lng": "73.891852",
+    "location": "Stop 3"
+},
+ {
+    "code": "00011",
+    "lat": "18.4488522",
+    "lng": "73.8920734",
+    "location": "Stop 3"
+},
+];
+
+
+
+function distance(lat1, lon1, lat2, lon2, unit) {
+  var radlat1 = Math.PI * lat1/180
+  var radlat2 = Math.PI * lat2/180
+  var theta = lon1-lon2
+  var radtheta = Math.PI * theta/180
+  var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+  if (dist > 1) {
+    dist = 1;
+  }
+  dist = Math.acos(dist)
+  dist = dist * 180/Math.PI
+  dist = dist * 60 * 1.1515
+  if (unit=="K") { dist = dist * 1.609344 }
+  if (unit=="N") { dist = dist * 0.8684 }
+  return dist
+}
+
+var html = "";
+var poslat = 18.4488883;
+var poslng = 73.891852;
+
+for (var i = 0; i < data.length; i++) {
+    // if this location is within 0.1KM of the user, add it to the list
+    if (distance(poslat, poslng, data[i].lat, data[i].lng, "K") <= 0.1) {
+        html += '<p>' + data[i].location + ' - ' + data[i].code + '</p>';
+    }
+}
+
+$('#nearbystops').append(html);
+
+</script>
+
+</body>
+</html>
+

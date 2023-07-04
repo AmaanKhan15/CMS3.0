@@ -1,0 +1,62 @@
+const express = require('express');
+const bodyParser = require('body-parser');
+const sequelize=require('./config/database')
+const router = express.Router();
+const isAuthorized = require('./middlewares/authenticateToken');
+const jwt = require("jsonwebtoken");
+const routes=require('./routes/index');
+// const PORT=process.env.PORT;
+const middleware=require('./controllers/auth');
+const app = express();
+var cors = require('cors')
+
+var config = require("./config/config");
+
+app.use(bodyParser.json()); // application/json
+
+app.use(bodyParser.urlencoded({extended : true}))     
+app.use(cors())
+
+// app.use((req, res, next) => {
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
+//     res.setHeader('Access-Control-Allow-Headers', 'x-www-form-urlencoded, Origin, X-Requested-With, Content-Type, Accept, Authorization, *');
+//   next();
+// });
+
+app.use('/auth/masters',isAuthorized,routes(router))
+app.use('/auth',routes(router))
+
+app.post("/auth/login", (req, res) => {
+  console.log("I am here")
+    middleware.authUser(req, res);
+  });
+  
+  
+  
+  
+  app.post("/auth/tokenValidity", async(req, res) => {
+    if (!req.headers["authorization"]) {
+     return res.status(401).send("Unauthorized");
+    } else {
+      jwt.verify(req.headers["authorization"], config.secret, (err, decoded) => {
+        if (err) {
+          res.status(403).send("Not authorized");
+        } else {
+          res.status(200).send("Token is valid");
+        }
+      });
+    }
+  });
+  
+  //app.use(router);
+  
+
+sequelize.sync().then(result=>{
+app.listen();
+}).catch(err=>{
+    console.log(err)
+})
+
+
+
