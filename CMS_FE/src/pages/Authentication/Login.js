@@ -25,11 +25,11 @@ const Login = props => {
   // }
   const handleValidSubmit = (event, values) => {
 
-    setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      }, 3000);	
-    console.log("Values are",values)
+    // setLoading(true)
+    // setTimeout(() => {
+    //   setLoading(false)
+    //   }, 3000);	
+    // console.log("Values are",values)
 
     props.loginUser(values, props.history)
   }
